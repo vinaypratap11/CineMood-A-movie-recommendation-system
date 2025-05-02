@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendation System</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --container-bg: #1e1e1e;
+            --bubble-ai-bg: #3a3f44;
+            --bubble-user-bg: #252525;
+            --input-bg: #252525;
+            --button-bg: #3a3f44;
+            --button-hover-bg: #555b60;
+            --footer-color: #888;
+            --subtitle-color: #b0b0b0;
+            --shadow-color: rgba(0,0,0,0.3);
+        }
+        [data-theme="light"] {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --container-bg: #ffffff;
+            --bubble-ai-bg: #e0e0e0;
+            --bubble-user-bg: #d0d0d0;
+            --input-bg: #e8e8e8;
+            --button-bg: #4a90e2;
+            --button-hover-bg: #357abd;
+            --footer-color: #666;
+            --subtitle-color: #555;
+            --shadow-color: rgba(0,0,0,0.1);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        }
+        body {
+            width: 100%;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+        .subtitle {
+            font-size: 14px;
+            color: var(--subtitle-color);
+            margin-bottom: 10px;
+        }
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .theme-toggle:hover {
+            background-color: var(--button-hover-bg);
+        }
+        .chat-container {
+            width: 90%;
+            max-width: 600px;
+            height: 60vh;
+            background-color: var(--container-bg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            font-size: 14px;
+            overflow-y: auto;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px var(--shadow-color);
+        }
+        .chat-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .chat-bubble {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 15px;
+            box-shadow: 2px 2px 5px var(--shadow-color);
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+        .ai-chat {
+            background-color: var(--bubble-ai-bg);
+            align-self: flex-start;
+            text-align: left;
+        }
+        .ai-chat ul {
+            list-style: none;
+            padding: 0;
+        }
+        .ai-chat li {
+            margin-bottom: 15px;
+        }
+        .ai-chat .movie-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .ai-chat .movie-description {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .ai-chat .movie-year {
+            font-size: 12px;
+            color: var(--subtitle-color);
+        }
+        .user-chat {
+            background-color: var(--bubble-user-bg);
+            align-self: flex-end;
+            text-align: right;
+        }
+        .prompt-area {
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        .prompt-area select {
+            padding: 12px;
+            border-radius: 20px;
+            border: none;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 14px;
+            min-width: 150px;
+            cursor: pointer;
+        }
+        .prompt-area button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .prompt-area button:hover {
+            background-color: var(--button-hover-bg);
+        }
+        .footer {
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--footer-color);
+        }
+        .registration {
+            margin-top: 5px;
+            font-size: 12px;
+            color: var(--subtitle-color);
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <button class="theme-toggle" id="theme-toggle">Toggle Theme</button>
+    <div class="title">CineMood</div>
+    <div class="subtitle">Powered by Vinay Pratap Singh and Gaurangi Peshin</div>
+    <div class="chat-container"></div>
+    <div class="prompt-area">
+        <select id="genre">
+            <option value="">Select Genre</option>
+            <option value="Action">Action</option>
+            <option value="Comedy">Comedy</option>
+            <option value="Drama">Drama</option>
+            <option value="Horror">Horror</option>
+            <option value="Sci-Fi">Sci-Fi</option>
+            <option value="Romance">Romance</option>
+            <option value="Thriller">Thriller</option>
+        </select>
+        <select id="language">
+            <option value="">Select Language</option>
+            <option value="English">English</option>
+            <option value="Hindi">Hindi</option>
+            <option value="Spanish">Spanish</option>
+            <option value="French">French</option>
+            <option value="Japanese">Japanese</option>
+        </select>
+        <select id="emotion">
+            <option value="">Select Emotion</option>
+            <option value="Happy">Happy</option>
+            <option value="Sad">Sad</option>
+            <option value="Exciting">Exciting</option>
+            <option value="Inspiring">Inspiring</option>
+            <option value="Scary">Scary</option>
+        </select>
+        <button id="submit">►</button>
+    </div>
+    <div class="footer">© 2025 Model Institute of Emgineering and Technology</div>
+    <div class="registration">Vinay Pratap Singh</div>
+    
+    <script>
+        let genreInput = document.querySelector("#genre");
+        let languageInput = document.querySelector("#language");
+        let emotionInput = document.querySelector("#emotion");
+        let submitBtn = document.querySelector("#submit");
+        let chatContainer = document.querySelector(".chat-container");
+        let themeToggle = document.querySelector("#theme-toggle");
+
+        const Api_Url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBJvhPW1ZSldEsWcGoNwgN4LuarfBPtnXY";
+
+        // Theme toggle functionality
+        themeToggle.addEventListener("click", () => {
+            const body = document.body;
+            const currentTheme = body.getAttribute("data-theme");
+            body.setAttribute("data-theme", currentTheme === "dark" ? "light" : "dark");
+            themeToggle.textContent = currentTheme === "dark" ? "Dark Mode" : "Light Mode";
+        });
+
+        async function generateResponse(genre, language, emotion) {
+            let aiChatBox = document.createElement("div");
+            aiChatBox.classList.add("chat-box");
+            let aiBubble = document.createElement("div");
+            aiBubble.classList.add("chat-bubble", "ai-chat");
+            aiBubble.textContent = "Finding movies...";
+            aiChatBox.appendChild(aiBubble);
+            chatContainer.appendChild(aiChatBox);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            let prompt = `Recommend 3 movies that match the following criteria: Genre: ${genre || "any"}, Language: ${language || "any"}, Emotion: ${emotion || "any"}. For each movie, provide the title, a brief description (2-3 sentences), and the year of release. Format the response as a clean, numbered list (e.g., 1. Title - Description - Year).`;
+            
+            try {
+                let response = await fetch(Api_Url, {
+                    method: "POST",
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({"contents": [{"parts": [{text: prompt}]}]})
+                });
+                let data = await response.json();
+                let rawText = data.candidates[0].content.parts[0].text.replace(/(\*\*|\*|_)/g, "").trim(); // Remove markdown
+
+                // Robust parsing for various list formats
+                let movieItems = rawText.split(/\n(?=\d+\.\s)/).map(item => item.trim()).filter(item => item);
+                let htmlContent = '<ul>';
+                
+                if (movieItems.length > 0) {
+                    movieItems.forEach(item => {
+                        // Match numbered list items (e.g., "1. Title - Description - Year" or similar)
+                        let match = item.match(/^\d+\.\s*([^-\n]+?)\s*-\s*([^-\n]+?)\s*-\s*(\d{4})/) ||
+                                    item.match(/^\d+\.\s*([^.\n]+?)\.\s*([^.\n]+?)\.\s*(\d{4})/); // Handle "1. Title. Description. Year"
+                        if (match) {
+                            let [, title, description, year] = match;
+                            htmlContent += `<li><span class="movie-title">${title.trim()}</span><br><span class="movie-description">${description.trim()}</span><br><span class="movie-year">${year.trim()}</span></li>`;
+                        } else {
+                            // Fallback for unparseable items
+                            htmlContent += `<li>${item}</li>`;
+                        }
+                    });
+                } else {
+                    // Fallback if no list items are detected
+                    htmlContent += `<li>${rawText || 'No recommendations found.'}</li>`;
+                }
+                
+                htmlContent += '</ul>';
+                aiBubble.innerHTML = htmlContent;
+            } catch (error) {
+                console.error('API Error:', error);
+                aiBubble.textContent = "Error fetching movie recommendations. Please try again.";
+            }
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function handleUserInput() {
+            let genre = genreInput.value;
+            let language = languageInput.value;
+            let emotion = emotionInput.value;
+
+            if (!genre && !language && !emotion) {
+                alert("Please select at least one criterion.");
+                return;
+            }
+
+            let userMessage = `Genre: ${genre || "Any"}, Language: ${language || "Any"}, Emotion: ${emotion || "Any"}`;
+            let userChatBox = document.createElement("div");
+            userChatBox.classList.add("chat-box");
+            let userBubble = document.createElement("div");
+            userBubble.classList.add("chat-bubble", "user-chat");
+            userBubble.textContent = userMessage;
+            userChatBox.appendChild(userBubble);
+            chatContainer.appendChild(userChatBox);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            genreInput.value = "";
+            languageInput.value = "";
+            emotionInput.value = "";
+
+            generateResponse(genre, language, emotion);
+        }
+        
+        submitBtn.addEventListener("click", handleUserInput);
+    </script>
+</body>
+</html>
