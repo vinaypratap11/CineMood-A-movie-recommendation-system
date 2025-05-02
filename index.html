@@ -60,6 +60,16 @@
             color: var(--subtitle-color);
             margin-bottom: 10px;
         }
+        .know-more {
+            font-size: 14px;
+            color: var(--text-color);
+            margin-bottom: 10px;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .know-more:hover {
+            color: var(--button-hover-bg);
+        }
         .theme-toggle {
             position: absolute;
             top: 20px;
@@ -180,6 +190,7 @@
     <button class="theme-toggle" id="theme-toggle">Toggle Theme</button>
     <div class="title">CineMood</div>
     <div class="subtitle">Powered by Vinay Pratap Singh and Gaurangi Peshin</div>
+    <a href="chatbot.html" class="know-more">Chat with Our AI Assistant</a>
     <div class="chat-container"></div>
     <div class="prompt-area">
         <select id="genre">
@@ -210,7 +221,7 @@
         </select>
         <button id="submit">►</button>
     </div>
-    <div class="footer">© 2025 Model Institute of Emgineering and Technology</div>
+    <div class="footer">© 2025 Model Institute of Engineering and Technology</div>
     <div class="registration">Vinay Pratap Singh</div>
     
     <script>
@@ -222,6 +233,7 @@
         let themeToggle = document.querySelector("#theme-toggle");
 
         const Api_Url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBJvhPW1ZSldEsWcGoNwgN4LuarfBPtnXY";
+        let conversationHistory = []; // Store conversation for context
 
         // Theme toggle functionality
         themeToggle.addEventListener("click", () => {
@@ -243,14 +255,20 @@
             
             let prompt = `Recommend 3 movies that match the following criteria: Genre: ${genre || "any"}, Language: ${language || "any"}, Emotion: ${emotion || "any"}. For each movie, provide the title, a brief description (2-3 sentences), and the year of release. Format the response as a clean, numbered list (e.g., 1. Title - Description - Year).`;
             
+            // Add prompt to conversation history
+            conversationHistory.push({ parts: [{ text: prompt }] });
+
             try {
                 let response = await fetch(Api_Url, {
                     method: "POST",
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({"contents": [{"parts": [{text: prompt}]}]})
+                    body: JSON.stringify({"contents": conversationHistory})
                 });
                 let data = await response.json();
-                let rawText = data.candidates[0].content.parts[0].text.replace(/(\*\*|\*|_)/g, "").trim(); // Remove markdown
+                let rawText = data.candidates[0].content.parts[0].text.replace(/(\*\*|\*|_)/g, "").trim();
+
+                // Update conversation history with response
+                conversationHistory.push({ parts: [{ text: rawText }] });
 
                 // Robust parsing for various list formats
                 let movieItems = rawText.split(/\n(?=\d+\.\s)/).map(item => item.trim()).filter(item => item);
@@ -258,19 +276,16 @@
                 
                 if (movieItems.length > 0) {
                     movieItems.forEach(item => {
-                        // Match numbered list items (e.g., "1. Title - Description - Year" or similar)
                         let match = item.match(/^\d+\.\s*([^-\n]+?)\s*-\s*([^-\n]+?)\s*-\s*(\d{4})/) ||
-                                    item.match(/^\d+\.\s*([^.\n]+?)\.\s*([^.\n]+?)\.\s*(\d{4})/); // Handle "1. Title. Description. Year"
+                                    item.match(/^\d+\.\s*([^.\n]+?)\.\s*([^.\n]+?)\.\s*(\d{4})/);
                         if (match) {
                             let [, title, description, year] = match;
                             htmlContent += `<li><span class="movie-title">${title.trim()}</span><br><span class="movie-description">${description.trim()}</span><br><span class="movie-year">${year.trim()}</span></li>`;
                         } else {
-                            // Fallback for unparseable items
                             htmlContent += `<li>${item}</li>`;
                         }
                     });
                 } else {
-                    // Fallback if no list items are detected
                     htmlContent += `<li>${rawText || 'No recommendations found.'}</li>`;
                 }
                 
@@ -312,5 +327,6 @@
         
         submitBtn.addEventListener("click", handleUserInput);
     </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9398e22dca9cb055',t:'MTc0NjIwMzIyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('script');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
