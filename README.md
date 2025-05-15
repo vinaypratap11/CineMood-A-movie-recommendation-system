@@ -1,5 +1,5 @@
 # CineMood-A-movie-recommendation-system
-CineDrama is movie recommendation system which suggests movies based on genre, language and mood
+CineMood is movie recommendation system which suggests movies based on genre, language and mood
 CineMood - Movie Recommendation System
 
 CineMood is a web-based movie recommendation system that suggests movies based on user-selected criteria: genre, language, and emotion. Powered by the Google Gemini API, it provides personalized movie recommendations with titles, descriptions, and release years in a clean, user-friendly interface. The application supports light and dark modes for enhanced user experience.
